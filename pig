@@ -1,7 +1,8 @@
 #!/usr/bin/env node 
 var fs = require('fs'),
   exec = require('child_process').exec,
- spawn = require('child_process').spawn
+ spawn = require('child_process').spawn,
+  path = require('path')
 
 function noOp() {
     /* do nothing */
@@ -64,6 +65,8 @@ function start(container, containers, done, noRecreate) {
 
     function doStart() {
         var deps = container.links || []
+        deps = deps.concat(container.volumesFrom || [])
+
         startDeps(deps, containers, run)
     }
 
@@ -88,6 +91,25 @@ function start(container, containers, done, noRecreate) {
                 var linkedContainer = containers[linkedName]
                 opts.push('--link')
                 opts.push(linkedContainer.name + ':' + linkedName)
+            })
+        }
+
+        if (container.volumes) {
+            for (var hostPath in container.volumes) {
+                if (container.volumes.hasOwnProperty(hostPath)) {
+                    var containerPath = container.volumes[hostPath]
+
+                    opts.push('-v')
+                    opts.push(path.resolve(hostPath) + ':' + containerPath) 
+                }
+            }
+        }
+
+        if (container.volumesFrom) {
+            container.volumesFrom.forEach(function(volumeName) {
+                var volumeContainer = containers[volumeName]
+                opts.push('--volumes-from')
+                opts.push(volumeContainer.name)
             })
         }
 
