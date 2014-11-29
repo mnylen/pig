@@ -1,6 +1,7 @@
 # pig
 
-Like fig, but geared more towards running tasks instead of services.
+Like fig, but geared more towards running one-off containers with background services
+automatically started.
 
 ## Installation
 
@@ -60,7 +61,13 @@ Put the following in `pig.json` in your project root:
 Now you can use `pig start repl` and it will start containers `db`, `code`, `deps` and, of course, `repl`.
 Happy hacking!
 
-## Supported properties 
+## Command reference
+
+* `start CONTAINER args` - starts the container defined in `pig.json`, passing `args` to it
+* `stop CONTAINER args` - stops a container defined in `pig.json`
+* `bash CONTAINER` - executes a bash in a running container
+
+## pig.json properties 
 
 All containers must have the following properties:
 
@@ -72,6 +79,8 @@ All containers must have the following properties:
 
 To link to other containers, use `links` property, which expects an list of container names to link. All
 linked containers will be started automatically when you `pig start` the container.
+
+Note that you currently need to have `daemon: true` set in any linked container. 
 
 ### Ports
 
@@ -94,11 +103,22 @@ configured, you can use `volumesFrom` like this:
 
     "volumesFrom": ["data1", "data2"]
 
+### Other properties
+
+* `workdir` sets the working directory
+
 ### TODO
 
 * Tests!
+* Command for stopping everything
 * Support for building images 
 * Support for passing environment variables
+* Support for external links
 * Allow passing `command` as string
 * Allow using another container as `base` to remove repetition from pig.json
-
+* May be rewrite in Python because it's bundled in most of systems
+* Bundle as npm package
+* Basic `pig.json` validations:
+    * required properties are set
+    * dependencies actually exist
+    * dependencies must be daemonized 
