@@ -7,6 +7,14 @@ function noOp() {
     /* do nothing */
 }
 
+function usage() {
+    return "Usage: pig COMMAND [SERVICE]\n\n" +
+           "Commands:\n" +
+           "  start   Start named service\n" +
+           "  stop    Stop named service\n" +
+           "  bash    Attach /bin/bash to named service (for debug)\n"
+}
+
 function whenRunning(container, then, andAfter) {
     exec('docker inspect ' + container.name, function(err) {
         if (!err) {
@@ -108,25 +116,33 @@ function main(args) {
     var command = args[0]
     var name = args[1]
 
-    var container = containers[name]
-    if (!container) {
-        throw new Error('Container \'' + name + '\' is not configured in pig.json')
+    function container() {
+        if (!name) {
+            throw new Error(usage())
+        }
+
+        var container = containers[name]
+        if (!container) {
+            throw new Error('Service \'' + name + '\' is not configured in pig.json') 
+        }
+
+        return container
     }
 
     switch (command) {
         case "start":
-            start(container, containers)
+            start(container(), containers)
             break
 
         case "stop":
-            stop(container, containers)
+            stop(container(), containers)
             break
 
         case undefined:
-            throw new Error('Usage: pig COMMAND [NAME]')
+            throw new Error(usage())
 
         default:
-            throw new Error('Unknown command \'' + command + '\'')
+            throw new Error('Unknown command \'' + command + '\'\n' + usage())
     }
 }
 
