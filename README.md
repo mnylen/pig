@@ -94,4 +94,11 @@ configured, you can use `volumesFrom` like this:
 
     "volumesFrom": ["data1", "data2"]
 
+### TODO
+
+* Tests!
+* Support for building images 
+* Support for passing environment variables
+* Allow passing `command` as string
+* Allow using another container as `base` to remove repetition from pig.json
 
