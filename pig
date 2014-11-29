@@ -94,6 +94,11 @@ function start(container, containers, commandArgs, done, noRecreate) {
             })
         }
 
+        if (container.workdir) {
+            opts.push('--workdir')
+            opts.push(container.workdir)
+        }
+
         if (container.volumes) {
             for (var hostPath in container.volumes) {
                 if (container.volumes.hasOwnProperty(hostPath)) {
@@ -119,7 +124,6 @@ function start(container, containers, commandArgs, done, noRecreate) {
             .concat(container.command || [])
             .concat(commandArgs)
 
-        console.log('docker ' + args.join(' '))
         if (container.daemon) {
             exec('docker ' + args.join(' '), done)
         } else {
