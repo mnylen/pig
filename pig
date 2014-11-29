@@ -9,9 +9,9 @@ function noOp() {
 }
 
 function usage() {
-    return "Usage: pig COMMAND [SERVICE]\n\n" +
+    return "Usage: pig COMMAND SERVICE [& args]\n\n" +
            "Commands:\n" +
-           "  start   Start named service\n" +
+           "  start   Start named service. \n" +
            "  stop    Stop named service\n" +
            "  bash    Attach /bin/bash to named service (for debug)\n"
 }
@@ -48,7 +48,7 @@ function startDeps(deps, containers, done) {
     function iterate(idx) {
         var name = deps[idx]
         if (name) {
-            start(containers[name], containers, function() {
+            start(containers[name], containers, [], function() {
                 iterate(idx+1)
             }, true)
         } else {
@@ -59,7 +59,7 @@ function startDeps(deps, containers, done) {
     iterate(0)
 }
 
-function start(container, containers, done, noRecreate) {
+function start(container, containers, commandArgs, done, noRecreate) {
     noRecreate = noRecreate || false
     done = done || noOp
 
@@ -113,7 +113,13 @@ function start(container, containers, done, noRecreate) {
             })
         }
 
-        var args = ['run'].concat(opts).concat(container.image).concat(container.command || [])
+        var args = ['run']
+            .concat(opts)
+            .concat(container.image)
+            .concat(container.command || [])
+            .concat(commandArgs)
+
+        console.log('docker ' + args.join(' '))
         if (container.daemon) {
             exec('docker ' + args.join(' '), done)
         } else {
@@ -147,6 +153,8 @@ function main(args) {
     var command = args[0]
     var name = args[1]
 
+    var dockerCommandArgs = args.slice(2)
+
     function container() {
         if (!name) {
             throw new Error(usage())
@@ -162,7 +170,7 @@ function main(args) {
 
     switch (command) {
         case "start":
-            start(container(), containers)
+            start(container(), containers, dockerCommandArgs)
             break
 
         case "stop":
