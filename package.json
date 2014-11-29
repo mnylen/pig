@@ -1,0 +1,21 @@
+{
+  "name": "docker-pig",
+  "description": "Docker container manager tool",
+  "version": "0.1.0",
+  "keywords": [
+    "docker"
+  ],
+  "homepage": "https://github.com/mnylen/pig",
+  "bugs": {
+    "url": "https://github.com/mnylen/pig/issues"
+  },
+  "license": "MIT",
+  "bin": {
+    "pig": "./bin/pig"
+  },
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/mnylen/pig.git"
+  },
+  "author": "Mikko Nylén"
+}

@@ -1,4 +1,3 @@
-#!/usr/bin/env node 
 var fs = require('fs'),
   exec = require('child_process').exec,
  spawn = require('child_process').spawn,
@@ -193,9 +192,11 @@ function main(args) {
     }
 }
 
-try {
-    var cmdArgs = process.argv.slice(2)
-    main(cmdArgs)
-} catch (e) {
-    process.stderr.write('error: ' + e.message + '\n')
+module.exports.main = function() {
+    try {
+        var cmdArgs = process.argv.slice(2)
+        main(cmdArgs)
+    } catch (e) {
+        process.stderr.write('error: ' + e.message + '\n')
+    }
 }
