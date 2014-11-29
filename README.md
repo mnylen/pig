@@ -6,7 +6,7 @@ automatically started.
 ## Installation
 
 * Have NodeJS installed
-* Clone this repo somewhere on your machine and add that somewhere to your `PATH`
+* Run `npm install docker-pig`
 
 ## Sample usage
 
@@ -116,8 +116,6 @@ configured, you can use `volumesFrom` like this:
 * Support for external links
 * Allow passing `command` as string
 * Allow using another container as `base` to remove repetition from pig.json
-* May be rewrite in Python because it's bundled in most of systems
-* Bundle as npm package
 * Basic `pig.json` validations:
     * required properties are set
     * dependencies actually exist
