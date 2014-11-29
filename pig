@@ -1,6 +1,7 @@
 #!/usr/bin/env node 
 var fs = require('fs'),
-  exec = require('child_process').exec
+  exec = require('child_process').exec,
+ spawn = require('child_process').spawn
 
 function noOp() {
     /* do nothing */
@@ -34,9 +35,32 @@ function stop(container, containers, done) {
     }, done)
 }
 
-function start(container, containers) {
-    stop(container, containers, function() {
-        var opts = ['--name ' + container.name]
+function startDeps(deps, containers, done) {
+    function iterate(idx) {
+        var name = deps[idx]
+        if (name) {
+            start(containers[name], containers, function() {
+                iterate(idx+1)
+            }, true)
+        } else {
+            done()
+        }
+    }
+
+    iterate(0)
+}
+
+function start(container, containers, done, noRecreate) {
+    noRecreate = noRecreate || false
+    done = done || noOp
+
+    function doStart() {
+        var deps = container.links || []
+        startDeps(deps, containers, run)
+    }
+
+    function run() {
+        var opts = ['--name', container.name]
         if (container.daemon) {
             opts.push('-d')
         } else {
@@ -46,17 +70,36 @@ function start(container, containers) {
 
         if (container.ports) {
             container.ports.forEach(function(port) {
-                opts.push('-p ' + port)
+                opts.push('-p')
+                opts.push(port)
             })
         }
 
-        var cmd = ['docker', 'run'].concat(opts).concat(container.image).join(' ')
-        exec(cmd, function(err, stdout, stderr) {
-            if (err) {
-                console.log('err: ' + err, stdout, stderr)
-            }
+        if (container.links) {
+            container.links.forEach(function(linkedName) {
+                var linkedContainer = containers[linkedName]
+                opts.push('--link')
+                opts.push(linkedContainer.name + ':' + linkedName)
+            })
+        }
+
+        var args = ['run'].concat(opts).concat(container.image).concat(container.command || [])
+        if (container.daemon) {
+            exec('docker ' + args.join(' '), done)
+        } else {
+            spawn('docker', args, { stdio: 'inherit' })
+        }
+    }
+
+    if (noRecreate) {
+        whenRunning(container, function() {
+            done()
+        }, function() {
+            doStart()
         })
-    })
+    } else {
+        stop(container, containers, doStart)
+    }
 }
 
 function main(args) {
