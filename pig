@@ -110,6 +110,15 @@ function start(container, containers, done, noRecreate) {
     }
 }
 
+function bash(container, containers) {
+    spawn('docker', [
+        'exec',
+        '-it',
+        container.name,
+        '/bin/bash'
+    ], { stdio: 'inherit' })
+}
+
 function main(args) {
     var containers = JSON.parse(fs.readFileSync('pig.json'))
 
@@ -136,6 +145,10 @@ function main(args) {
 
         case "stop":
             stop(container(), containers)
+            break
+
+        case "bash":
+            bash(container(), containers)
             break
 
         case undefined:
