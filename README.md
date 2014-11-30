@@ -66,6 +66,8 @@ Happy hacking!
 * `start CONTAINER args` - starts the container defined in `pig.json`, passing `args` to it
 * `stop CONTAINER args` - stops a container defined in `pig.json`
 * `bash CONTAINER` - executes a bash in a running container
+* `up` - starts all daemons
+* `down` - stops all daemons
 
 ## pig.json properties 
 
@@ -74,13 +76,20 @@ All containers must have the following properties:
 * `image` - the image to run the container off
 * `name` - the name the container will be given
 * `command` - command to be executed (defaults to the default command of the image)
+* `daemon` - start the container in daemon mode? Defaults to false
 
 ### Links 
 
 To link to other containers, use `links` property, which expects an list of container names to link. All
-linked containers will be started automatically when you `pig start` the container.
+linked containers will be started automatically when you `pig start` the container. The alias for linked
+containers will be the configuration name.
 
 Note that you currently need to have `daemon: true` set in any linked container. 
+
+You can also link to external containers which are not configured in `pig.json` using the `externalLinks`
+property. For example:
+
+    externalLinks: ["name:alias"]
 
 ### Ports
 
@@ -106,4 +115,5 @@ configured, you can use `volumesFrom` like this:
 ### Other properties
 
 * `workdir` sets the working directory
+* `environment` can be used for setting environment variables. Expects an Object with variable names as keys and values as values 
 
