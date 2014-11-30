@@ -99,6 +99,12 @@ function start(container, containers, commandArgs, done, noRecreate) {
             })
         }
 
+        if (container.externalLinks) {
+            container.externalLinks.forEach(function(link) {
+                addOpts('--link', link)
+            })
+        }
+
         if (container.workdir) {
             addOpts('--workdir', container.workdir)
         }
