@@ -134,8 +134,6 @@ function start(container, containers, commandArgs, done, noRecreate) {
             .concat(container.command || [])
             .concat(commandArgs)
 
-        console.log(args.join(' '))
-
         if (container.daemon) {
             exec('docker ' + args.join(' '), done)
         } else {
