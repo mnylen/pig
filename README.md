@@ -107,18 +107,3 @@ configured, you can use `volumesFrom` like this:
 
 * `workdir` sets the working directory
 
-### TODO
-
-* Tests!
-* Command for stopping everything
-* Command for starting all daemons
-* Support for building images 
-* Support for external links
-* Allow passing `command` as string
-* Allow using another container as `base` to remove repetition from pig.json
-* Add non-interactive mode (without `-it`)
-* Add parameter for verbose logging
-* Basic `pig.json` validations:
-    * required properties are set
-    * dependencies actually exist
-    * dependencies must be daemonized 
