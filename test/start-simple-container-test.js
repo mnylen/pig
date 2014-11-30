@@ -1,4 +1,5 @@
 var commands = require('../lib/commands'),
+     helpers = require('./helpers'),
       expect = require('chai').expect,
         exec = require('child_process').exec,
            _ = require('lodash')
@@ -10,33 +11,13 @@ describe('starting a simple container', function() {
         "command": ["echo"] 
     }
 
-    var stdout = ""
-
-    after(function(done) {
-        exec('docker ps -a |grep test-', function(err, stdout, stderr) {
-            var containerIds = stdout
-                .split('\n')
-                .map(function(line) { return line.split(' ')[0] })
-                .filter(function(id) { return id !== '' })
-
-            function iterate(idx) {
-                var id = containerIds[idx]
-                if (id) {
-                    exec('docker kill ' + id + ' |xargs docker rm', function() {
-                        iterate(idx+1)
-                    })
-                } else {
-                    done()
-                }
-            }
-
-            iterate(0)
-        })
-    })
+    after(helpers.cleanUpTestContainers)
 
     describe('a non-daemon container', function() {
+        var stdout = ""
+
         before(function(done) {
-            captureStdout(function(data, encoding, fd) {
+            helpers.captureStdout(function(data, encoding, fd) {
                 stdout += data
             }, function(uncapture) {
                 var args = ["Hello, world!"]
@@ -71,7 +52,7 @@ describe('starting a simple container', function() {
         function startDaemon(message, done) {
             daemonContainer.command = ["echo", message]
 
-            captureStdout(_.noop, function(uncapture) {
+            helpers.captureStdout(_.noop, function(uncapture) {
                 commands.start(daemonContainer, [daemonContainer], [], { }, function() {
                     uncapture()
                     done()
@@ -108,16 +89,3 @@ describe('starting a simple container', function() {
     })
 })
 
-function captureStdout(onData, block) {
-    var oldWrite = process.stdout.write
-
-    process.stdout.write = (function(write) {
-        return function(string, encoding, fd) {
-            onData(string, encoding, fd)
-        }
-    })(process.stdout.write)
-
-    block(function() {
-        process.stdout.write = oldWrite
-    })
-}
