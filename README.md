@@ -111,6 +111,7 @@ configured, you can use `volumesFrom` like this:
 
 * Tests!
 * Command for stopping everything
+* Command for starting all daemons
 * Support for building images 
 * Support for external links
 * Allow passing `command` as string
