@@ -58,6 +58,7 @@ function startDeps(deps, containers, done) {
     iterate(0)
 }
 
+
 function start(container, containers, commandArgs, done, noRecreate) {
     noRecreate = noRecreate || false
     done = done || noOp
@@ -71,40 +72,42 @@ function start(container, containers, commandArgs, done, noRecreate) {
 
     function run() {
         var opts = ['--name', container.name]
+
+        function addOpts() {
+            var newOpts = Array.prototype.slice.call(arguments)
+            newOpts.forEach(function(opt) {
+                opts.push(opt)
+            })
+        }
+
         if (container.daemon) {
-            opts.push('-d')
+            addOpts('-d')
         } else {
-            opts.push('-it')
-            opts.push('--rm')
+            addOpts('--rm', '-it')
         }
 
         if (container.ports) {
             container.ports.forEach(function(port) {
-                opts.push('-p')
-                opts.push(port)
+                addOpts('-p', port)
             })
         }
 
         if (container.links) {
             container.links.forEach(function(linkedName) {
                 var linkedContainer = containers[linkedName]
-                opts.push('--link')
-                opts.push(linkedContainer.name + ':' + linkedName)
+                addOpts('--link', linkedContainer.name + ':' + linkedName)
             })
         }
 
         if (container.workdir) {
-            opts.push('--workdir')
-            opts.push(container.workdir)
+            addOpts('--workdir', container.workdir)
         }
 
         if (container.environment) {
             for (var name in container.environment) {
                 if (container.environment.hasOwnProperty(name)) {
                     var value = container.environment[name]
-
-                    opts.push('-e')
-                    opts.push(name + '=' + value)
+                    addOpts('-e', name + '=' + value)
                 }
             }
         }
@@ -113,9 +116,7 @@ function start(container, containers, commandArgs, done, noRecreate) {
             for (var hostPath in container.volumes) {
                 if (container.volumes.hasOwnProperty(hostPath)) {
                     var containerPath = container.volumes[hostPath]
-
-                    opts.push('-v')
-                    opts.push(path.resolve(hostPath) + ':' + containerPath) 
+                    addOpts('-v', path.resolve(hostPath) + ':' + containerPath)
                 }
             }
         }
@@ -123,8 +124,7 @@ function start(container, containers, commandArgs, done, noRecreate) {
         if (container.volumesFrom) {
             container.volumesFrom.forEach(function(volumeName) {
                 var volumeContainer = containers[volumeName]
-                opts.push('--volumes-from')
-                opts.push(volumeContainer.name)
+                addOpts('--volumes-from', volumeContainer.name)
             })
         }
 
