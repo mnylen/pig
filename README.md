@@ -112,7 +112,6 @@ configured, you can use `volumesFrom` like this:
 * Tests!
 * Command for stopping everything
 * Support for building images 
-* Support for passing environment variables
 * Support for external links
 * Allow passing `command` as string
 * Allow using another container as `base` to remove repetition from pig.json

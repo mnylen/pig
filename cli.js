@@ -98,6 +98,17 @@ function start(container, containers, commandArgs, done, noRecreate) {
             opts.push(container.workdir)
         }
 
+        if (container.environment) {
+            for (var name in container.environment) {
+                if (container.environment.hasOwnProperty(name)) {
+                    var value = container.environment[name]
+
+                    opts.push('-e')
+                    opts.push(name + '=' + value)
+                }
+            }
+        }
+
         if (container.volumes) {
             for (var hostPath in container.volumes) {
                 if (container.volumes.hasOwnProperty(hostPath)) {
@@ -122,6 +133,8 @@ function start(container, containers, commandArgs, done, noRecreate) {
             .concat(container.image)
             .concat(container.command || [])
             .concat(commandArgs)
+
+        console.log(args.join(' '))
 
         if (container.daemon) {
             exec('docker ' + args.join(' '), done)
