@@ -14,8 +14,11 @@
     "pig": "./bin/pig"
   },
   "repository": {
-      "type": "git",
-      "url": "https://github.com/mnylen/pig.git"
+    "type": "git",
+    "url": "https://github.com/mnylen/pig.git"
   },
-  "author": "Mikko Nylén"
+  "author": "Mikko Nylén",
+  "dependencies": {
+    "lodash": "^2.4.1"
+  }
 }

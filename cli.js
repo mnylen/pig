@@ -1,7 +1,8 @@
 var fs = require('fs'),
   exec = require('child_process').exec,
  spawn = require('child_process').spawn,
-  path = require('path')
+  path = require('path'),
+     _ = require('lodash')
 
 function noOp() {
     /* do nothing */
@@ -12,6 +13,8 @@ function usage() {
            "Commands:\n" +
            "  start   Start named service. \n" +
            "  stop    Stop named service\n" +
+           "  up      Start all daemons from pig.json\n" +
+           "  down    Stop all daemons in pig.json\n" +
            "  bash    Attach /bin/bash to named service (for debug)\n"
 }
 
@@ -193,6 +196,36 @@ function bash(container, containers) {
     ], { stdio: 'inherit' })
 }
 
+function startDaemons(containers) {
+    var daemons = _.filter(containers, { daemon: true })
+
+    function iterate(idx) {
+        var container = daemons[idx]
+        if (container) {
+            start(container, containers, [], function() {
+                iterate(idx+1)
+            }, true)
+        }
+    }
+
+    iterate(0)
+}
+
+function stopDaemons(containers) {
+    var daemons = _.filter(containers, { daemon: true })
+
+    function iterate(idx) {
+        var container = daemons[idx]
+        if (container) {
+            stop(container, containers, function() {
+                iterate(idx+1)
+            })
+        }
+    }
+
+    iterate(0)
+}
+
 function main(args) {
     var containers = JSON.parse(fs.readFileSync('pig.json'))
 
@@ -225,6 +258,14 @@ function main(args) {
 
         case "bash":
             bash(container(), containers)
+            break
+
+        case "up":
+            startDaemons(containers)
+            break
+
+        case "down":
+            stopDaemons(containers)
             break
 
         case undefined:
