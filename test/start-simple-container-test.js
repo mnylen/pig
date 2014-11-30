@@ -1,5 +1,6 @@
 var commands = require('../lib/commands'),
-      expect = require('chai').expect
+      expect = require('chai').expect,
+        exec = require('child_process').exec
 
 describe('starting a simple container', function() {
     var container = {
@@ -25,6 +26,16 @@ describe('starting a simple container', function() {
 
     it('executes the given command', function() {
         expect(stdout).to.eql('Hello, world!\n')
+    })
+
+    it('removes the container afterwards (uses --rm)', function(done) {
+        exec('docker inspect test-container', function(err) {
+            if (err) {
+                done()
+            } else {
+                throw new Error('test-container was not removed from docker')
+            }
+        })
     })
 })
 
