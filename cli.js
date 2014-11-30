@@ -43,7 +43,22 @@ function stop(container, containers, done) {
     }, done)
 }
 
-function startDeps(deps, containers, done) {
+function build(container, done) {
+    var tag = container.name + '-image'
+
+    exec('docker build -t ' + tag + ' ' + container.build, function(err) {
+        if (err) {
+            throw new Error('Failed to build image for ' + container.name)
+        } else {
+            done(tag)
+        }
+    })
+}
+
+function startDeps(container, containers, done) {
+    var deps = container.links || []
+    deps = deps.concat(container.volumesFrom || [])
+
     function iterate(idx) {
         var name = deps[idx]
         if (name) {
@@ -58,16 +73,27 @@ function startDeps(deps, containers, done) {
     iterate(0)
 }
 
+function buildImage(container, done) {
+    if (container.build) {
+        build(container, function(image) {
+            container.image = image
+            done()
+        })
+    } else {
+        done()
+    }
+}
 
 function start(container, containers, commandArgs, done, noRecreate) {
     noRecreate = noRecreate || false
     done = done || noOp
 
     function doStart() {
-        var deps = container.links || []
-        deps = deps.concat(container.volumesFrom || [])
-
-        startDeps(deps, containers, run)
+        buildImage(container, function() {
+            startDeps(container, containers, function() {
+                run()
+            })
+        })
     }
 
     function run() {
