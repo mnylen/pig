@@ -20,5 +20,9 @@
   "author": "Mikko Nylén",
   "dependencies": {
     "lodash": "^2.4.1"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "mocha": "^2.0.1"
   }
 }
