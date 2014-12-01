@@ -1,5 +1,4 @@
-var commands = require('../lib/commands'),
-     helpers = require('./helpers'),
+var helpers = require('./helpers'),
       expect = require('chai').expect,
       domain = require('domain'),
         exec = require('child_process').exec,
@@ -17,7 +16,7 @@ describe('pig.json validations', function() {
                 "links": ["foo"]
             }
 
-            commands.start(container, { container: container }, [], { interactive: false }, function(err) {
+            helpers.commands(container).start(container, [], { recreate:  true }, function(err) {
                 expect(err.message).to.eql('Could not resolve link foo for test-container')
                 done()
             })
@@ -32,7 +31,7 @@ describe('pig.json validations', function() {
                 "links": ["container"] 
             }
 
-            commands.start(container, { container: container }, [], { interactive: false }, function(err) {
+            helpers.commands(container).start(container, [], { recreate: true}, function(err) {
                 expect(err.message).to.eql('Container test-container is linking to itself.')
                 done()
             })
@@ -53,7 +52,7 @@ describe('pig.json validations', function() {
                 }
             } 
 
-            commands.start(containers.container, containers, [], { interactive: false }, function(err) {
+            helpers.commands(containers).start(containers.container, [], { recreate: true }, function(err) {
                 expect(err.message).to.eql('Link another for test-container is not a daemon. Only daemons can be linked to.')
                 done()
             })

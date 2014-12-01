@@ -1,9 +1,17 @@
-var exec = require('child_process').exec 
+var exec = require('child_process').exec
 
 module.exports.logsOutput = function(name, callback) {
     exec('docker logs ' + name, function(err, stdout, stderr) {
         callback(stdout, stderr)
     })
+}
+
+module.exports.commands = function(container) {
+    if (container.name) {
+        return require('../lib/commands')({ container: container }, { interactive: false })
+    } else {
+        return require('../lib/commands')(container, { interactive: false })
+    }
 }
 
 module.exports.cleanUpTestContainers = function(done) {

@@ -1,8 +1,7 @@
-var commands = require('../lib/commands'),
-     helpers = require('./helpers'),
-      expect = require('chai').expect,
-        exec = require('child_process').exec,
-           _ = require('lodash')
+var helpers = require('./helpers'),
+     expect = require('chai').expect,
+       exec = require('child_process').exec,
+          _ = require('lodash')
 
 describe('bind mounting volumes', function() {
     after(helpers.cleanUpTestContainers)
@@ -22,8 +21,10 @@ describe('bind mounting volumes', function() {
             "volumes": volumes 
         }
 
+        var commands = require('../lib/commands')({ container: container }, { interactive: false })
+
         before(function(done) {
-            commands.start(container, [container], [], { interactive: false }, done) 
+            commands.start(container, [], { recreate : true }, done) 
         })
 
         it('makes host files readable inside container', function(done) {
@@ -54,8 +55,10 @@ describe('bind mounting volumes', function() {
             }
         }
 
+        var commands = require('../lib/commands')(containers, { interactive: false })
+
         before(function(done) {
-            commands.start(containers.container, containers, [], { interactive: false }, done)
+            commands.start(containers.container, [], { recreate : true }, done)
         })
 
         it('makes volumes from other container available inside container', function(done) {

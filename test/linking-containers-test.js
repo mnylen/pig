@@ -1,8 +1,7 @@
-var commands = require('../lib/commands'),
-     helpers = require('./helpers'),
-      expect = require('chai').expect,
-        exec = require('child_process').exec,
-           _ = require('lodash')
+var helpers = require('./helpers'),
+     expect = require('chai').expect,
+       exec = require('child_process').exec,
+          _ = require('lodash')
 
 describe('linking containers', function() {
     after(helpers.cleanUpTestContainers)
@@ -28,7 +27,8 @@ describe('linking containers', function() {
                 }
             }
 
-            commands.start(containers.container, containers, [], { interactive: false }, done)
+            var commands = require('../lib/commands')(containers, { interactive: false })
+            commands.start(containers.container, [], { recreate : true }, done)
         })
     })
 

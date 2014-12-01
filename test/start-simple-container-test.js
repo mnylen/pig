@@ -1,8 +1,7 @@
-var commands = require('../lib/commands'),
-     helpers = require('./helpers'),
-      expect = require('chai').expect,
-        exec = require('child_process').exec,
-           _ = require('lodash')
+var helpers = require('./helpers'),
+     expect = require('chai').expect,
+       exec = require('child_process').exec,
+          _ = require('lodash')
 
 describe('starting a simple container', function() {
     var container = {
@@ -11,12 +10,20 @@ describe('starting a simple container', function() {
         "command": ["echo"] 
     }
 
+    var daemonContainer = _.merge({}, container, {
+        name: 'test-daemon-container',
+        daemon: true
+    })
+
+    var containers = { container: container, daemon: daemonContainer } 
+    var commands = require('../lib/commands')(containers, { interactive: false })
+
     after(helpers.cleanUpTestContainers)
 
     describe('a non-daemon container', function() {
         before(function(done) {
             var args = ["Hello, world!"]
-            commands.start(container, [container], args, { interactive: false }, done)
+            commands.start(container, args, { recreate: true }, done)
         })
 
         it('executes the given command', function(done) {
@@ -28,14 +35,9 @@ describe('starting a simple container', function() {
     })
 
     describe('a daemon container', function() {
-        var daemonContainer = _.merge({}, container, {
-            name: 'test-daemon-container',
-            daemon: true
-        })
-
         function startDaemon(message, done) {
             daemonContainer.command = ["echo", message]
-            commands.start(daemonContainer, [daemonContainer], [], { }, done)
+            commands.start(daemonContainer, [], { recreate: true }, done)
         }
 
         before(function(done) {

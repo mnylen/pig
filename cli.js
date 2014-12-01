@@ -1,5 +1,4 @@
-var   fs = require('fs'),
-commands = require('./lib/commands')
+var fs = require('fs')
 
 function usage() {
     return "Usage: pig COMMAND SERVICE [& args]\n\n" +
@@ -33,28 +32,31 @@ function main(args) {
     }
 
     var options = {
-        interactive: process.env["NONINTERACTIVE"] === 'true' ? false : true
+        interactive: !(process.env["NONINTERACTIVE"] === 'true'),
+        verbose: process.env["VERBOSE"] === 'true'
     }
+
+    var commands = require('./lib/commands')(containers, options)
 
     switch (command) {
         case "start":
-            commands.start(container(), containers, dockerCommandArgs, options, handleError)
+            commands.start(container(), dockerCommandArgs, { recreate: true }, handleError)
             break
 
         case "stop":
-            commands.stop(container(), containers)
+            commands.stop(container())
             break
 
         case "bash":
-            commands.bash(container(), containers)
+            commands.bash(container())
             break
 
         case "up":
-            commands.startDaemons(containers)
+            commands.startDaemons()
             break
 
         case "down":
-            commands.stopDaemons(containers)
+            commands.stopDaemons()
             break
 
         case undefined:
