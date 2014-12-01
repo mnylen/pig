@@ -39,4 +39,40 @@ describe('bind mounting volumes', function() {
                                   'all work and no play makes jack a dull boy\n\n')
         })
     })
+
+    describe('using volumesFrom property', function() {
+        var containers = {
+            "data":{
+                "image": "ubuntu",
+                "name": "test-data",
+                "daemon": true,
+                "command": ["tail", "-f", "/dev/null"],
+                "volumes": { "./test/data1": "/data" }
+            },
+
+            "container":{
+                "image": "ubuntu",
+                "name": "test-container",
+                "command": ["cat", "/data/lorem.txt"],
+                "volumesFrom": ["data"]
+            }
+        }
+
+        var stdout = ""
+        before(function(done) {
+            helpers.captureStdout(function(data) {
+                stdout += data
+            }, function(uncapture) {
+                commands.start(containers.container, containers, [], { interactive: false }, function() {
+                    uncapture()
+                    done()
+                })
+            })
+        })
+
+        it('makes volumes from other container available inside container', function() {
+            expect(stdout).to.eql('lorem ipsum dolor sit amet\n\n')
+        })
+    })
 })
+
