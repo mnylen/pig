@@ -32,9 +32,13 @@ function main(args) {
         return container
     }
 
+    var options = {
+        interactive: process.env["NONINTERACTIVE"] === 'true' ? false : true
+    }
+
     switch (command) {
         case "start":
-            commands.start(container(), containers, dockerCommandArgs, { interactive: true }, handleError)
+            commands.start(container(), containers, dockerCommandArgs, options, handleError)
             break
 
         case "stop":
