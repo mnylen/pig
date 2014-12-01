@@ -34,7 +34,7 @@ function main(args) {
 
     switch (command) {
         case "start":
-            commands.start(container(), containers, dockerCommandArgs)
+            commands.start(container(), containers, dockerCommandArgs, {}, handleError)
             break
 
         case "stop":
@@ -61,11 +61,17 @@ function main(args) {
     }
 }
 
+function handleError(err) {
+    if (err) {
+        process.stderr.write('error: ' + e.message + '\n')
+    }
+}
+
 module.exports.main = function() {
     try {
         var cmdArgs = process.argv.slice(2)
         main(cmdArgs)
     } catch (e) {
-        process.stderr.write('error: ' + e.message + '\n')
+        handleError(err)
     }
 }
