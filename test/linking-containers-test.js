@@ -7,7 +7,6 @@ var commands = require('../lib/commands'),
 describe('linking containers', function() {
     after(helpers.cleanUpTestContainers)
 
-    var stdout = ""
     before(function(done) {
         helpers.cleanUpTestContainers(function() {
             var containers = {
@@ -29,19 +28,15 @@ describe('linking containers', function() {
                 }
             }
 
-            helpers.captureStdout(function(data) {
-                stdout += data
-            }, function(uncapture) {
-                commands.start(containers.container, containers, [], { interactive: false }, function() {
-                    uncapture()
-                    done()
-                })
-            })
+            commands.start(containers.container, containers, [], { interactive: false }, done)
         })
     })
 
-    it('links the listed containers', function() {
-        expect(stdout).to.eql('lorem ipsum dolor sit amet\n\n')
+    it('links the listed containers', function(done) {
+        helpers.logsOutput('test-container', function(stdout) {
+            expect(stdout).to.eql('lorem ipsum dolor sit amet\n\n')
+            done()
+        })
     })
 
     it('leaves linked containers running', function(done) {

@@ -22,21 +22,17 @@ describe('bind mounting volumes', function() {
             "volumes": volumes 
         }
 
-        var stdout = ""
         before(function(done) {
-            helpers.captureStdout(function(data) {
-                stdout += data
-            }, function(uncapture) {
-                commands.start(container, [container], [], { interactive: false }, function() {
-                    uncapture()
-                    done()
-                })
-            })
+            commands.start(container, [container], [], { interactive: false }, done) 
         })
 
-        it('makes host files readable inside container', function() {
-            expect(stdout).to.eql('lorem ipsum dolor sit amet\n\n' +
-                                  'all work and no play makes jack a dull boy\n\n')
+        it('makes host files readable inside container', function(done) {
+            helpers.logsOutput('test-lorem', function(stdout) {
+                expect(stdout).to.eql('lorem ipsum dolor sit amet\n\n' +
+                                      'all work and no play makes jack a dull boy\n\n')
+
+                done()
+            })
         })
     })
 
@@ -58,20 +54,15 @@ describe('bind mounting volumes', function() {
             }
         }
 
-        var stdout = ""
         before(function(done) {
-            helpers.captureStdout(function(data) {
-                stdout += data
-            }, function(uncapture) {
-                commands.start(containers.container, containers, [], { interactive: false }, function() {
-                    uncapture()
-                    done()
-                })
-            })
+            commands.start(containers.container, containers, [], { interactive: false }, done)
         })
 
-        it('makes volumes from other container available inside container', function() {
-            expect(stdout).to.eql('lorem ipsum dolor sit amet\n\n')
+        it('makes volumes from other container available inside container', function(done) {
+            helpers.logsOutput('test-container', function(stdout) {
+                expect(stdout).to.eql('lorem ipsum dolor sit amet\n\n')
+                done()
+            })
         })
     })
 })

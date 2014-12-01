@@ -1,16 +1,8 @@
 var exec = require('child_process').exec 
 
-module.exports.captureStdout = function(onData, block) {
-    var oldWrite = process.stdout.write
-
-    process.stdout.write = (function(write) {
-        return function(string, encoding, fd) {
-            onData(string, encoding, fd)
-        }
-    })(process.stdout.write)
-
-    block(function() {
-        process.stdout.write = oldWrite
+module.exports.logsOutput = function(name, callback) {
+    exec('docker logs ' + name, function(err, stdout, stderr) {
+        callback(stdout, stderr)
     })
 }
 
