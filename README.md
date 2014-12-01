@@ -126,5 +126,5 @@ configured, you can use `volumesFrom` like this:
 ### Other properties
 
 * `workdir` sets the working directory
-* `environment` can be used for setting environment variables. Expects an Object with variable names as keys and values as values 
+* `environment` can be used for setting environment variables. Expects an Object with variable names as keys and values as values (to substitute runtime environment variables, use `$varname` syntax)
 
