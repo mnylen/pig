@@ -69,6 +69,17 @@ Happy hacking!
 * `up` - starts all daemons
 * `down` - stops all daemons
 
+## VERBOSE and NONINTERACTIVE
+
+If you want to get some logging out from pig, set `VERBOSE=true` environment variable
+
+If you don't want pty to be allocated for non-daemon containers, set `NONINTERACTIVE=true` environment variable
+
+For example:
+
+    VERBOSE=true NONINTERACTIVE=true pig up
+
+
 ## pig.json properties 
 
 All containers must have the following properties:
