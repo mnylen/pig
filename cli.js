@@ -34,7 +34,7 @@ function main(args) {
 
     switch (command) {
         case "start":
-            commands.start(container(), containers, dockerCommandArgs, {}, handleError)
+            commands.start(container(), containers, dockerCommandArgs, { interactive: true }, handleError)
             break
 
         case "stop":
