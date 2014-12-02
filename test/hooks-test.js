@@ -32,5 +32,33 @@ describe('hooks', function() {
             expect(fs.existsSync('tmp')).to.be.false
         })
     })
+
+    describe('when before hook exits with non-zero code', function() {
+        var container = {
+            "name": "test-container-before-fail",
+            "image": "ubuntu",
+            "command": ["echo", "Hello, world!"],
+            "hooks": {
+                "before": "./test/hooks/fail.sh"
+            }
+        }
+
+        it('returns an error', function(done) {
+            helpers.commands(container).start(container, [], { recreate: true }, function(err) {
+                expect(err).to.not.be.undefined
+                expect(err.message).to.eql('Hook ./test/hooks/fail.sh returned with code 1 != 0')
+                done()
+            })
+        })
+
+        it('does not start the container', function(done) {
+            helpers.commands(container).start(container, [], { recreate: true }, function() {
+                helpers.logsOutput('test-container-before-fail', function(stdout, stderr) {
+                    expect(stdout).to.eql('')
+                    done()
+                })
+            })
+        })
+    })
 })
 
