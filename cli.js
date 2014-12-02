@@ -69,7 +69,7 @@ function main(args) {
 
 function handleError(err) {
     if (err) {
-        process.stderr.write('error: ' + e.message + '\n')
+        process.stderr.write('error: ' + err.message + '\n')
     }
 }
 
@@ -77,7 +77,7 @@ module.exports.main = function() {
     try {
         var cmdArgs = process.argv.slice(2)
         main(cmdArgs)
-    } catch (e) {
+    } catch (err) {
         handleError(err)
     }
 }
