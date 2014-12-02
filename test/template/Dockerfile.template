@@ -1,0 +1,11 @@
+FROM ubuntu
+
+ENV message <%= message %>
+
+<% if (env.http_proxy) { %>
+ENV env_http_proxy <%= env.http_proxy %> 
+<% } %>
+
+ADD ./greeting.txt /greeting.txt 
+
+CMD ["bash"]
