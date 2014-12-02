@@ -1,130 +1,217 @@
 # pig
 
-Like fig, but geared more towards running one-off containers with background services
-automatically started.
+A tool for configuring and starting Docker containers in development and ci environment.
+
+## License
+
+MIT. See LICENSE
+
+## Features
+
+* Configure containers in clear json syntax
+* Automatically starts linked containers
+* Mount volumes, forward ports
+* Supports building images using a Dockerfile template
+* Supports before/after hooks for container startup
 
 ## Installation
 
-* Have NodeJS installed
-* Run `npm install docker-pig`
+    npm install docker-pig
 
-## Sample usage
+## Sample
 
-Put the following in `pig.json` in your project root:
+Given the following `pig.json`
 
     {
-      "db":{
-        "name": "mongo",
-        "image": "mongo:2.6.4",
-        "ports": ["27017:27017"],
-        "daemon": true
-      },
+        "db":{
+            "name": "my-project-mongo",
+            "image":"mongo:2.6.4",
+            "daemon":true
+        },
 
-      "dbshell":{
-        "name": "mongoshell",
-        "image": "mongo:2.6.4",
-        "command": ["mongo", "db:27017"],
-        "links": ["db"]
-      },
-
-      "code":{
-        "name": "codedata",
-        "image": "busybox",
-        "command": ["tail", "-f", "/dev/null"],
-        "daemon": true,
-        "volumes": {
-          ".": "/project"
+        "myapp":{
+            "name":"my-project-app",
+            "image":"mongo:2.6.4",
+            "command":["bash"],
+            "links":["db"]
         }
-      },
-
-      "deps":{
-        "name": "depsdata",
-        "image": "busybox",
-        "command": ["tail", "-f", "/dev/null"],
-        "daemon": true,
-        "volumes": {
-          "./deps/m2": "/root/.m2",
-          "./deps/lein": "/root/.lein"
-        }
-      },
-
-      "repl":{
-        "name": "repl",
-        "image": "pandeiro/lein",
-        "command": ["repl", ":start", ":host", "0.0.0.0", ":port", "59593"],
-        "volumesFrom": ["code", "deps"],
-        "links": ["db"],
-        "ports": ["59593:59593"]
-      }
     }
 
-Now you can use `pig start repl` and it will start containers `db`, `code`, `deps` and, of course, `repl`.
-Happy hacking!
+You can now `pig start myapp` to start your app (a bash terminal) plus the MongoDB server on background.
+
+The MongoDB container is linked to your app using `--link`, so you can now access it from `db:27017` (or use `$MONGO_PORT_27017_TCP_ADDR`) 
+
+    root@281b802b0e52:/# mongo db:27017 
+
+Even better, you can now add this to `pig.json`:
+
+    "mongoshell":{
+        "name":"my-project-mongoshell",
+        "image":"mongo:2.6.4",
+        "command":["mongo", "db:27017"]
+    }
+
+And use `pig start mongoshell` whenever you need mongo shell access.
 
 ## Command reference
 
-* `start CONTAINER args` - starts the container defined in `pig.json`, passing `args` to it
-* `stop CONTAINER args` - stops a container defined in `pig.json`
-* `bash CONTAINER` - executes a bash in a running container
-* `up` - starts all daemons
-* `down` - stops all daemons
+* `start CONTAINER [args]` - starts container,  passing `args` to it's command 
+* `stop CONTAINER` - stops container
+* `bash CONTAINER` - executes a bash inside running container
+* `up` - start all daemons
+* `down` - stop all daemons
 
-## VERBOSE and NONINTERACTIVE
+## Basic configuration properties
 
-If you want to get some logging out from pig, set `VERBOSE=true` environment variable
+| Property | Example | Explanation |
+|----------|---------|-------------|
+| `image (String)` | `"ubuntu:14.04"` | image to run the container off |
+| `name (String)` | `"my-project-app"` | system-wide unique name for the container (passed to `--name` for `docker run`) |
+| `command (Array)` | `["echo", "Hello, world!"]` | command to run (must be passed as an array) |
+| `workdir (String)` | `"/project"` |  working directory |
+| `ports (Array)` | `["27017:27017"]` | port mappings |
+| `daemon (Boolean)` | `true` | start container in daemon mode |
 
-If you don't want pty to be allocated for non-daemon containers, set `NONINTERACTIVE=true` environment variable
+`name` and either `image`, `build` or `buildTemplate` are required. Otherwise, all properties are optional.
 
-For example:
+## Linking
 
-    VERBOSE=true NONINTERACTIVE=true pig up
+Use the `links` property. This must be an array of links to configure for the container. The linked containers are
+started automatically (if not yet started) when starting the container. Example:
 
+    "links": ["db"]
 
-## pig.json properties 
+Note, the entries in the array must reference the configuration name of the container and not it's `name` property.
+So if you have:
 
-All containers must have the following properties:
-
-* `image` - the image to run the container off
-* `name` - the name the container will be given
-* `command` - command to be executed (defaults to the default command of the image)
-* `daemon` - start the container in daemon mode? Defaults to false
-
-### Links 
-
-To link to other containers, use `links` property, which expects an list of container names to link. All
-linked containers will be started automatically when you `pig start` the container. The alias for linked
-containers will be the configuration name.
-
-Note that you currently need to have `daemon: true` set in any linked container. 
-
-You can also link to external containers which are not configured in `pig.json` using the `externalLinks`
-property. For example:
-
-    externalLinks: ["name:alias"]
-
-### Ports
-
-To forward ports, use `ports` property. It expects a list of `hostPort:containerPort` strings. 
-
-### Volumes
-
-To bind mount volumes, use `volumes` property. It expects an object with `hostPath: containerPath` pairs.
-For example:
-
-    "volumes": {
-      ".": "/project"
+    "db": {
+        "name":"mongo",
+        "image":"mongo:2.6.4"
     }
 
-Relative `hostPath`s will be resolved automatically
+and want to link to that, refer to `db` in your `links` property, not `mongo`. The link will be aliased as `db`
+(the actual command line option passed to `docker run` will be `--link mongo:db`)
 
-If you have a data container, you can use `volumesFrom` which expects a list of container names
-to mount volumes from that container. For example, if you have `data1` and `data2` containers
-configured, you can use `volumesFrom` like this:
+You can also use  `externalLinks` which takes an array of whatever Docker's `--link` expects
+(for example, `"externalLinks": ["name1:alias1", "name2:alias2"]`). This can be used if you need to link to containers
+not configured in pig.json
+
+**NOTE**: When you link containers, make sure linked containers have `daemon` property set to `true`. Otherwise,
+starting the container will fail.
+
+## Mounting volumes
+
+You can mount volumes to your container by supplying `volumes` configuration property. It expects an object with
+`hostPath` as key (can be relative) and `containerPath` as value. For example the following would mount current
+working directory as `/project` inside the container:
+
+    "volumes": { ".": "/project"  }
+
+Alternatively, you can define another data container with the volumes and then use `volumesFrom` to use Docker's
+own `--volumes-from` support. For example, if you had `data1` and `data2` containers defined, you could then have
+their volumes in your container with:
 
     "volumesFrom": ["data1", "data2"]
 
-### Other properties
+Don't worry about starting those: `start` automatically starts any containers you specify in `volumesFrom`
 
-* `workdir` sets the working directory
-* `environment` can be used for setting environment variables. Expects an Object with variable names as keys and values as values (to substitute runtime environment variables, use `$varname` syntax)
+## Passing environment variables
+
+Use `environment` property, which expects an `Object` of `{name:value}` pairs. Each pair will be passed
+to `docker run` as `-e name=value`.
+
+If you want, you can also use `$envname` syntax in the value to substitute runtime environment values.
+
+An example:
+
+    "environment":{
+        "foo":"bar",
+        "bar":"$foo"
+    }
+
+The above configuration would add `-e foo=bar -e bar=$foo`, substituting `$foo` with whatever the value
+for `$foo` would be at the time of running. 
+
+## Building
+
+If you must use a custom image, you can specify it to be built by pig with `build` property, which
+expects a path to the directory containing `Dockerfile`. The image will be tagged as `NAME-image`
+
+Need more power to building? Use `buildTemplate` property to build your image using a `Dockerfile`
+generated from a template. The `buildTemplate` property must be an `Object` with the following keys:
+
+* `path` - path to a directory containing a file called `Dockerfile.template`
+* `data` - an `Object` of variable `{name:value}` pairs you want to pass to your build (environment variables are automatically available in `env`)
+
+The `Dockerfile.template` is then rendered using [lodash template](https://lodash.com/docs#template) as `Dockerfile`
+and built using `docker build` as `NAME-image`
+
+Example `Dockerfile.template`:
+
+    FROM ubuntu
+
+    <% if (env.http_proxy) { %>ENV http_proxy <%= env.http_proxy %><% } %>
+
+    CMD ["env"]
+
+An example `pig.json`:
+
+    {
+        "container":{
+            "name":"my-app",
+            "buildTemplate":{"path":"."}
+        }
+    }
+
+Output of running `http_proxy=http://proxy.com pig start container` should now contain line `http_proxy=http://proxy.com`.
+
+How cool is that?
+
+## Before and after hooks
+
+Need to run stuff before starting a container? Or after it? Use `hooks` property:
+
+    "hooks":{
+        "before":"./download-data.sh",
+        "after":"./wait-until-fully-started.sh"
+    }
+
+Adding that to your configuration will run the before hook `download-data.sh` before starting the container. The hook must return
+with status `0` or otherwise the container won't start. 
+
+The after hook `wait-until-fully-started.sh` is executed after the container has started. The after hook is very useful in
+scenarios where you need to wait for the container be fully started (all ports bound to etc.) until moving on.
+
+If after hook in linked container exits with non-zero code, the container won't be started.
+
+The hooks must be executable scripts. They will be run in the host machine, not inside a docker container. You can, however, use
+docker (or even pig) in your own hook scripts.
+
+## VERBOSE and NONINTERACTIVE
+
+Not going well? Set `VERBOSE=true` to get some output.
+
+Having problems with hanging builds, or in general with pseudo-ttys? Use `NONINTERACTIVE=true` to start containers without `-it`
+
+## Why not just use fig?
+
+I can't speak for you, but my reasons for not using fig after trying it out were:
+ 
+* doesn't setup port mappings for one-off containers
+* doesn't start data containers for one-off containers automatically 
+* `fig up` starts everything, no way to omit launching "development" containers (mongo shell, sbt, lein, ...)
+
+Basically I wanted to use fig for one-off containers and they didn't work like I wanted. 
+
+Also, sadly, fig didn't provide solution to some of the problems we had solved with our messy docker environment startup scripts: 
+
+* some services take a long time to fully start, so we need to wait until we execute tests against them (see hooks above)
+
+* `docker build` does not allow environment variables and running `docker build` in our CI environment requires `http_proxy` set, but the same proxy on local machine breaks everything (hence, build from template - see building above)
+
+## Contributing
+
+Fork the repo, send in pull requests. Remember to update documentation!
+
+Run tests using `mocha test` (you might need to `docker pull ubuntu` and `docker pull python` first)
 
