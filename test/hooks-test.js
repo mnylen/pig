@@ -60,5 +60,38 @@ describe('hooks', function() {
             })
         })
     })
+
+    describe('when after hook fails in linked container', function() {
+        var containers = {
+            "linked": {
+                "name": "test-container-linked",
+                "image": "ubuntu",
+                "command": ["echo", "Hello from linked container!"],
+                "daemon": true,
+                "hooks": {
+                    "after": "./test/hooks/fail.sh"
+                }
+            },
+
+            "container": {
+                "name": "test-container-with-linked-container-after-hook-fail",
+                "image": "ubuntu",
+                "command": ["echo", "Hello from container!"],
+                "links": ["linked"]
+            }
+        }
+
+        it('does not start the container', function(done) {
+            helpers.commands(containers).start(containers.container, [], { recreate: true }, function(err) {
+                expect(err).to.not.be.undefined
+                expect(err.message).to.eql('Hook ./test/hooks/fail.sh returned with code 1 != 0')
+
+                helpers.logsOutput('test-container-with-linked-container-after-hook-fail', function(stdout) {
+                    expect(stdout).to.eql('')
+                    done() 
+                })
+            })
+        })
+    })
 })
 
