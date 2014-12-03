@@ -213,5 +213,6 @@ Also, sadly, fig didn't provide solution to some of the problems we had solved w
 
 Fork the repo, send in pull requests. Remember to update documentation!
 
-Run tests using `mocha test` (you might need to `docker pull ubuntu` and `docker pull python` first)
+Run tests using `mocha test` (you might need to `docker pull ubuntu` and `docker pull python` first). Also, depending on how fast your
+computer is, you might need to run mocha with `--timeout 3000` or higher.
 
