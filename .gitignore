@@ -1,3 +1,5 @@
 pig.json
 node_modules
+*.iml
+.idea
 
