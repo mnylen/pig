@@ -2,10 +2,11 @@
   "fileserver":{
     "name":"test-fileserver",
     "image":"python",
+    "daemon":true,
     "command":["python", "-mhttp.server", "8080"],
     "workdir":"/data",
     "volumes":{
-      "../data1":"/data"
+      "../../data1":"/data"
     }
   },
 

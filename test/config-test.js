@@ -14,22 +14,23 @@ describe('config', function() {
 
             expect(config.fromFile('pig.json')).to.eql({
                 "prefix/fileserver":{
-                    "pigdir":path.join(process.cwd(), 'another'),
                     "name":"test-fileserver",
                     "image":"python",
+                    "daemon":true,
                     "command":["python", "-mhttp.server", "8080"],
                     "workdir":"/data",
                     "volumes":{
-                        "../data1":"/data"
-                    }
+                        "../../data1":"/data"
+                    },
+                    "pigdir":path.join(process.cwd(), 'another')
                 },
 
                 "prefix/container":{
-                    "pigdir":path.join(process.cwd(), 'another'),
                     "name":"test-container",
                     "build":".",
                     "links":["prefix/fileserver"],
-                    "volumesFrom":["prefix/fileserver"]
+                    "volumesFrom":["prefix/fileserver"],
+                    "pigdir":path.join(process.cwd(), 'another')
                 }
             })
         })
