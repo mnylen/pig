@@ -1,7 +1,7 @@
 {
   "name": "docker-pig",
   "description": "Docker container manager tool",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "keywords": [
     "docker"
   ],
