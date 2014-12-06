@@ -13,6 +13,7 @@ MIT. See LICENSE
 * Mount volumes, forward ports
 * Supports building images using a Dockerfile template
 * Supports before/after hooks for container startup
+* Supports including other pig.json files 
 
 ## Installation
 
@@ -186,6 +187,57 @@ If after hook in linked container exits with non-zero code, the container won't 
 
 The hooks must be executable scripts. They will be run in the host machine, not inside a docker container. You can, however, use
 docker (or even pig) in your own hook scripts.
+
+## Including configuration from other file
+
+You can include all containers from another pig.json to your current one by using the `include` directive at the top
+level of your pig.json. This is useful when you have organized your application into smaller projects with their
+own pig.jsons and you wish to create a master configuration that collects all these together.
+
+To use, simply list all pig.jsons to include as `{path:prefix}` pairs. The containers defined in `path` will then
+be available with `prefix/NAME` using `start`, `stop` or `bash` commands.
+
+As an example, if you had `bar/pig.json` and `foo/pig.json`, you could include them like this:
+
+    {
+        "include":{
+            "bar/pig.json":"bar",
+            "foo/pig.json":"foo"
+        }
+    }
+
+Now any container defined in `foo/pig.json` could be started with `pig start foo/NAME`, and containers in
+`bar/pig.json` with `pig start bar/NAME`.
+
+Starting a container that was included will chdir to the directory where the configuration exists, so any
+paths will still be relative to the original configuration (not the including one).
+
+## Starting a group of containers as daemons
+
+If you know you need a specific set of containers started for a task, you can create a container with just
+`startAll` property with a list of all containers to start:
+
+    {
+        "include":{
+            "payments/pig.json":"payments",
+            "orders/pig.json":"orders",
+            "site/pig.json":"site"
+        },
+        "everything":{
+            "startAll":[
+                "payments/server",
+                "orders/server",
+                "site/server"
+            ]
+        }
+    }
+
+Now running `pig start everything` would start included `payments/server`, `orders/server` and `site/server`
+containers.
+
+Using `startAll` is roughly equivalent to calling `pig start` for each of the listed containers separately.
+The difference is that all listed containers will be started in daemon mode, regardless of the `daemon`
+property value.
 
 ## VERBOSE and NONINTERACTIVE
 
