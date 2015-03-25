@@ -12,7 +12,7 @@ describe('config', function() {
         it('adds containers from path to the root configuration using prefix', function() {
             process.chdir('test/include')
 
-            expect(config.fromFile('pig.json')).to.eql({
+            expect(config.fromFile('pig')).to.eql({
                 "prefix/fileserver":{
                     "name":"test-fileserver",
                     "image":"python",

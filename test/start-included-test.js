@@ -11,11 +11,11 @@ describe('starting containers included from another pig.json', function() {
     before(function(done) {
         process.chdir('test/include')
 
-        var config = require('../lib/config').fromFile('pig.json')
+        var config = require('../lib/config').fromFile('pig')
         helpers.commands(config).start(config['prefix/container'], [], { recreate: true }, done)
     })
 
-    it('chdirs to included pig.json path and starts the container', function(done) {
+    it('chdirs to included pig path and starts the container', function(done) {
         helpers.logsOutput('test-container', function(stdout) {
             expect(stdout).to.contain('fileserver: lorem ipsum dolor sit amet\n')
             expect(stdout).to.contain('volume: lorem ipsum dolor sit amet\n')
