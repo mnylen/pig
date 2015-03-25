@@ -8,12 +8,12 @@ MIT. See LICENSE
 
 ## Features
 
-* Configure containers in clear json syntax
+* Configure containers in clear json or yml syntax
 * Automatically starts linked containers
 * Mount volumes, forward ports
 * Supports building images using a Dockerfile template
 * Supports before/after hooks for container startup
-* Supports including other pig.json files 
+* Supports including other pig files 
 
 ## Installation
 
@@ -247,6 +247,26 @@ Not going well? Set `VERBOSE=true` to get some output.
 
 Having problems with hanging builds, or in general with pseudo-ttys? Use `NONINTERACTIVE=true` to start containers without `-it`
 
+## using YAML instead
+
+The pig.json file shown above can also be written as pig.yml:
+
+    db:
+        name: my-project-mongo
+        image: mongo:2.6.4
+        daemon: true
+        
+    myapp:
+        name: my-project-app
+        image: mongo:2.6.4
+        command:
+            - bash
+        links:
+            - db
+    
+    
+
+    
 ## Why not just use fig?
 
 I can't speak for you, but my reasons for not using fig after trying it out were:
