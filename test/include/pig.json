@@ -1,5 +1,5 @@
 {
   "include":{
-    "another/pig":"prefix"
+    "another/pig.json":"prefix"
   }
 }
