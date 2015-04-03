@@ -11,7 +11,7 @@ describe('starting containers included from another pig.json', function() {
     before(function(done) {
         process.chdir('test/include')
 
-        var config = require('../lib/config').fromFile('pig')
+        var config = require('../lib/config').fromFile('pig.json')
         helpers.commands(config).start(config['prefix/container'], [], { recreate: true }, done)
     })
 
