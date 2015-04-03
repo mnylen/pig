@@ -1,0 +1,18 @@
+fileserver: 
+  name: "test-fileserver"
+  image: "python"
+  daemon: true
+  command: 
+    - "python"
+    - "-mhttp.server"
+    - "8080"
+  workdir: "/data"
+  volumes: 
+    ../../data1: "/data"
+container: 
+  name: "test-container"
+  build: "."
+  links: 
+    - "fileserver"
+  volumesFrom: 
+    - "fileserver"
