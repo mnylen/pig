@@ -56,13 +56,17 @@ And use `pig start mongoshell` whenever you need mongo shell access.
 
 ## Command reference
 
-* `start CONTAINER [args]` - starts container,  passing `args` to it's command 
+* `start [-R|--no-recreate] CONTAINER [args]` - starts container,  passing `args` to it's command 
 * `stop CONTAINER` - stops container
 * `bash CONTAINER` - executes a bash inside running container
 * `logs CONTAINER [opts]` - show `docker logs` output for container with the given `opts` (`-t` for tail, `-f` for follow, anything `docker logs` accepts)
 * `inspect CONTAINER` - show `docker inspect` output for container
-* `up` - start all daemons
+* `up [-R|--no-recreate]` - start all daemons
 * `down` - stop all daemons
+
+The default behaviour is that containers are re-created every time when `start` or `up` command is executed.
+If you want to prevent this behaviour and start existing container instead, add either `-R` or 
+`--no-recreate` flag to your `start`/`up` command.
 
 ## Basic configuration properties
 
