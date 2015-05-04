@@ -31,7 +31,9 @@ describe('starting and stopping daemons', function() {
 
         var commands = helpers.commands(containers)
 
-        before(commands.startDaemons)
+        before(function(done) {
+            commands.startDaemons({recreate: true}, done)
+        })
 
         it('starts all containers with daemon: true', function(done) {
             helpers.logsOutput('test-daemon1', function(stdout) {
@@ -50,11 +52,14 @@ describe('starting and stopping daemons', function() {
 
         describe('stopping daemons', function() {
             before(commands.stopDaemons)
-            
-            it('stops and removes all daemons', function(done) {
-                async.map(['test-daemon1', 'test-daemon2'], containerExists, function(_, running) {
+
+            it('stops all daemons but does not remove them', function(done) {
+                async.map(['test-daemon1', 'test-daemon2'], containerRunning, function(_, running) {
                     expect(running).to.eql([false, false])
-                    done()
+                    async.map(['test-daemon1', 'test-daemon2'], containerExists, function(_, exists) {
+                        expect(exists).to.eql([true, true])
+                        done()
+                    })
                 })
             })
 
@@ -76,6 +81,16 @@ describe('starting and stopping daemons', function() {
                     callback(null, false)
                 } else {
                     callback(null, true)
+                }
+            })
+        }
+
+        function containerRunning(name, callback) {
+            exec('docker inspect ' + name, function(err, stdout) {
+                if (err) {
+                    callback(null, false)
+                } else {
+                    callback(null, !!JSON.parse(stdout)[0].State.Running)
                 }
             })
         }
