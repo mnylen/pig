@@ -58,6 +58,7 @@ And use `pig start mongoshell` whenever you need mongo shell access.
 
 * `start [-R|--no-recreate] CONTAINER [args]` - starts container,  passing `args` to it's command 
 * `stop CONTAINER` - stops container
+* `rm CONTAINER` - removes container
 * `bash CONTAINER` - executes a bash inside running container
 * `logs CONTAINER [opts]` - show `docker logs` output for container with the given `opts` (`-t` for tail, `-f` for follow, anything `docker logs` accepts)
 * `inspect CONTAINER` - show `docker inspect` output for container
