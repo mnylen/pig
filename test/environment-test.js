@@ -34,25 +34,20 @@ describe('setting environment variables', function() {
             "image": "ubuntu",
             "command": ["env"],
             "environment":{
-                "http_proxy":"$http_proxy",
-                "https_proxy":"$https_proxy",
-                "no_proxy":"$no_proxy",
-                "middle_substitution": "substituting works at middle of string $http_proxy!"
+                "somevar":"$somevar",
+                "middle_substitution": "substituting works at middle of string $somevar!"
             }
         }
 
         before(function(done) {
-            process.env['http_proxy'] = 'http://localhost:8080'
-            process.env['https_proxy'] = 'https://localhost:8080'
+            process.env['somevar'] = 'somevalue'
             helpers.commands(container).start(container, [], { recreate: true }, done)
         })
 
         it('passes the runtime values for environment variables to container', function(done) {
             helpers.logsOutput('test-container', function(stdout) {
-                expect(stdout).to.include('http_proxy=http://localhost:8080\n')
-                expect(stdout).to.include('https_proxy=https://localhost:8080\n')
-                expect(stdout).to.include('no_proxy=\n')
-                expect(stdout).to.include('middle_substitution=substituting works at middle of string http://localhost:8080!\n')
+                expect(stdout).to.include('somevar=somevalue\n')
+                expect(stdout).to.include('middle_substitution=substituting works at middle of string somevalue!\n')
                 done()
             })
         })

@@ -2,8 +2,8 @@ FROM ubuntu
 
 ENV message <%= message %>
 
-<% if (env.http_proxy) { %>
-ENV env_http_proxy <%= env.http_proxy %> 
+<% if (env.somevar) { %>
+ENV env_somevar <%= env.somevar %> 
 <% } %>
 
 ADD ./greeting.txt /greeting.txt 

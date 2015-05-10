@@ -72,10 +72,10 @@ describe('building', function() {
             })
 
             it('passes process.env to the lodash template as \'env\'', function(done) {
-                process.env.http_proxy = "http://proxy.com"
+                process.env.somevar = "value"
 
                 startWithCommand(['env'], function(stdout) {
-                    expect(stdout).to.contain('env_http_proxy=http://proxy.com\n')
+                    expect(stdout).to.contain('env_somevar=value\n')
                     done()
                 })
             })
