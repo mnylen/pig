@@ -1,3 +1,5 @@
+**NOTE**: pig is not maintained anymore. You should use docker-compose or similar. The last docker version pig was tested on was 1.4.0, no guarantees about it working with later versions.
+
 # pig
 
 A tool for configuring and starting Docker containers in development and ci environment.
